@@ -123,6 +123,13 @@
       <h2>Shop ready-made prints.</h2>
       <p class="sub">Hand-picked pieces from our studio collection. Tap any to print on the material of your choice.</p>
     </div>
+    <div class="shop__filters" id="shopFilters">
+      <button class="chip is-active" data-cat="all">All</button>
+      <button class="chip" data-cat="landscape">Landscape</button>
+      <button class="chip" data-cat="abstract">Abstract</button>
+      <button class="chip" data-cat="urban">Urban</button>
+      <button class="chip" data-cat="nature">Nature</button>
+    </div>
     <div class="shop__grid" id="shopGrid"></div>
   </section>
 
@@ -182,6 +189,26 @@
             <button class="chip is-active" data-finish="matte">Matte</button>
             <button class="chip" data-finish="satin">Satin</button>
             <button class="chip" data-finish="gloss">Gloss</button>
+          </div>
+        </div>
+
+        <div class="panel__group">
+          <label>Frame</label>
+          <div class="chips" id="frameChips">
+            <button class="chip is-active" data-frame="none">None</button>
+            <button class="chip" data-frame="black">Black</button>
+            <button class="chip" data-frame="white">White</button>
+            <button class="chip" data-frame="oak">Oak</button>
+            <button class="chip" data-frame="walnut">Walnut</button>
+          </div>
+        </div>
+
+        <div class="panel__group">
+          <label>Matting</label>
+          <div class="chips" id="mattingChips">
+            <button class="chip is-active" data-matting="none">None</button>
+            <button class="chip" data-matting="white">White</button>
+            <button class="chip" data-matting="cream">Cream</button>
           </div>
         </div>
 
@@ -317,6 +344,8 @@
       }
     }
   </script>
+  <script src="https://js.stripe.com/v3/"></script>
+  <script src="assets/js/config.js"></script>
   <script type="module" src="assets/js/main.js"></script>
 </body>
 </html>

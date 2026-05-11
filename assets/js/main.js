@@ -19,6 +19,20 @@ const ORIENT_DIMS = {
   square:    { w: 3.5, h: 3.5 },
 };
 
+// Add-on pricing for frames and matting (in USD)
+const FRAME_PRICES = { none: 0, black: 25, white: 25, oak: 35, walnut: 45 };
+const FRAME_SIZE_MULT = { S: 1, M: 1.4, L: 1.9, XL: 2.6 };
+const MATTING_PRICES = { none: 0, white: 10, cream: 12 };
+const MATTING_SIZE_MULT = { S: 1, M: 1.3, L: 1.6, XL: 2.0 };
+
+const FRAME_COLORS = {
+  black:  { color: 0x111418, roughness: 0.4, metalness: 0.1 },
+  white:  { color: 0xf2efe6, roughness: 0.6, metalness: 0.0 },
+  oak:    { color: 0xc9a878, roughness: 0.7, metalness: 0.05 },
+  walnut: { color: 0x4a2c1a, roughness: 0.55, metalness: 0.05 },
+};
+const MATTING_COLORS = { white: 0xf4f1ea, cream: 0xe8dfc9 };
+
 const PLACEHOLDER_TEX = makePlaceholderTexture();
 
 function makePlaceholderTexture() {
@@ -145,6 +159,69 @@ function buildPrintMesh({ material, w = 3, h = 4, texture = PLACEHOLDER_TEX, fin
   mesh.castShadow = true;
   mesh.receiveShadow = true;
   return mesh;
+}
+
+// Build a print possibly wrapped in matting + frame. Returns a THREE.Group.
+function buildFramedPrint({ material, w, h, texture, finish, frame = 'none', matting = 'none' }) {
+  const group = new THREE.Group();
+  const print = buildPrintMesh({ material, w, h, texture, finish });
+  // Push the print slightly forward when framed so it sits in front of the matting
+  const hasFrame = frame !== 'none';
+  const hasMat = matting !== 'none';
+  const matWidth = hasMat ? Math.min(w, h) * 0.10 : 0;     // matting border thickness
+  const frameWidth = hasFrame ? Math.min(w, h) * 0.07 : 0; // frame border thickness
+  const frameDepth = hasFrame ? 0.18 : 0;
+
+  if (hasMat) {
+    const matW = w + matWidth * 2;
+    const matH = h + matWidth * 2;
+    const matMesh = new THREE.Mesh(
+      new THREE.BoxGeometry(matW, matH, 0.04),
+      new THREE.MeshStandardMaterial({ color: MATTING_COLORS[matting] || 0xf4f1ea, roughness: 0.95 })
+    );
+    matMesh.position.z = -0.04;
+    group.add(matMesh);
+    // recess print slightly into the mat
+    print.position.z = 0.005;
+  }
+
+  if (hasFrame) {
+    const innerW = w + matWidth * 2;
+    const innerH = h + matWidth * 2;
+    const outerW = innerW + frameWidth * 2;
+    const outerH = innerH + frameWidth * 2;
+
+    // Build frame as 4 boxes (a rectangle ring) so each side gets clean lighting.
+    const fc = FRAME_COLORS[frame] || FRAME_COLORS.black;
+    const frameMat = new THREE.MeshStandardMaterial({
+      color: fc.color, roughness: fc.roughness, metalness: fc.metalness,
+    });
+    const sideZ = -0.03; // frame sits at same plane as matting, surrounding it
+
+    // top / bottom
+    const horiz = new THREE.BoxGeometry(outerW, frameWidth, frameDepth);
+    const top = new THREE.Mesh(horiz, frameMat);
+    top.position.set(0, innerH / 2 + frameWidth / 2, sideZ);
+    const bot = new THREE.Mesh(horiz, frameMat);
+    bot.position.set(0, -innerH / 2 - frameWidth / 2, sideZ);
+    // left / right
+    const vert = new THREE.BoxGeometry(frameWidth, innerH, frameDepth);
+    const left = new THREE.Mesh(vert, frameMat);
+    left.position.set(-innerW / 2 - frameWidth / 2, 0, sideZ);
+    const right = new THREE.Mesh(vert, frameMat);
+    right.position.set(innerW / 2 + frameWidth / 2, 0, sideZ);
+
+    group.add(top, bot, left, right);
+
+    // Subtle inner bevel highlight ring
+    const bevelMat = new THREE.MeshStandardMaterial({ color: 0x000000, roughness: 0.8, opacity: 0.5, transparent: true });
+    const bevel = new THREE.Mesh(new THREE.BoxGeometry(innerW + 0.02, innerH + 0.02, 0.005), bevelMat);
+    bevel.position.z = sideZ + frameDepth / 2 + 0.001;
+    group.add(bevel);
+  }
+
+  group.add(print);
+  return group;
 }
 
 // Set up a renderer + scene with environment for reflections
@@ -279,38 +356,69 @@ function initMaterialCards() {
 // SHOP — render a curated grid (data-driven)
 // =====================================================
 const PRODUCTS = [
-  { id: 'p1', title: 'Aurora Drift',     price: 49, hue: 'linear-gradient(135deg,#0f2a52,#3a8fa0,#a4dcd8)' },
-  { id: 'p2', title: 'Desert Bloom',     price: 59, hue: 'linear-gradient(135deg,#3a1f0e,#c97a3a,#f5c451)' },
-  { id: 'p3', title: 'Neon Tokyo',       price: 69, hue: 'linear-gradient(135deg,#0a0a1f,#ff2e88,#7a2bff)' },
-  { id: 'p4', title: 'Pacific Calm',     price: 49, hue: 'linear-gradient(135deg,#0a3245,#137a8a,#bfead6)' },
-  { id: 'p5', title: 'Forest Cathedral', price: 59, hue: 'linear-gradient(135deg,#0c1d12,#2d6b3a,#cae29c)' },
-  { id: 'p6', title: 'Iron & Glass',     price: 69, hue: 'linear-gradient(135deg,#111418,#3b424c,#9da6b4)' },
+  { id: 'p1',  title: 'Aurora Drift',     price: 49, cat: 'landscape', hue: 'linear-gradient(135deg,#0f2a52,#3a8fa0,#a4dcd8)' },
+  { id: 'p2',  title: 'Desert Bloom',     price: 59, cat: 'landscape', hue: 'linear-gradient(135deg,#3a1f0e,#c97a3a,#f5c451)' },
+  { id: 'p3',  title: 'Neon Tokyo',       price: 69, cat: 'urban',     hue: 'linear-gradient(135deg,#0a0a1f,#ff2e88,#7a2bff)' },
+  { id: 'p4',  title: 'Pacific Calm',     price: 49, cat: 'landscape', hue: 'linear-gradient(135deg,#0a3245,#137a8a,#bfead6)' },
+  { id: 'p5',  title: 'Forest Cathedral', price: 59, cat: 'nature',    hue: 'linear-gradient(135deg,#0c1d12,#2d6b3a,#cae29c)' },
+  { id: 'p6',  title: 'Iron & Glass',     price: 69, cat: 'urban',     hue: 'linear-gradient(135deg,#111418,#3b424c,#9da6b4)' },
+  { id: 'p7',  title: 'Citrus Geometry',  price: 39, cat: 'abstract',  hue: 'linear-gradient(135deg,#f5c451,#ff8a4c,#ff5fa2)' },
+  { id: 'p8',  title: 'Midnight Bloom',   price: 59, cat: 'nature',    hue: 'linear-gradient(135deg,#080611,#3a1d6b,#9a6cff)' },
+  { id: 'p9',  title: 'Coastal Fog',      price: 49, cat: 'landscape', hue: 'linear-gradient(135deg,#1a2a33,#5b7a85,#dbe6ea)' },
+  { id: 'p10', title: 'Lava Field',       price: 69, cat: 'landscape', hue: 'linear-gradient(135deg,#1a0a0a,#7a1d12,#ff5b2c)' },
+  { id: 'p11', title: 'Skyline Glow',     price: 69, cat: 'urban',     hue: 'linear-gradient(135deg,#0b1430,#1b3a7a,#f5c451)' },
+  { id: 'p12', title: 'Brutalist',        price: 59, cat: 'urban',     hue: 'linear-gradient(135deg,#1a1a1a,#4a4a4a,#a8a8a8)' },
+  { id: 'p13', title: 'Velvet Wave',      price: 39, cat: 'abstract',  hue: 'linear-gradient(135deg,#2a0a3a,#7a1d8a,#ff5fa2)' },
+  { id: 'p14', title: 'Color Field 03',   price: 39, cat: 'abstract',  hue: 'linear-gradient(135deg,#0f4d2a,#7ab058,#f5e7a3)' },
+  { id: 'p15', title: 'Fern Study',       price: 49, cat: 'nature',    hue: 'linear-gradient(135deg,#0d1e0c,#3d6b1a,#a8d36b)' },
+  { id: 'p16', title: 'Tide Pool',        price: 49, cat: 'nature',    hue: 'linear-gradient(135deg,#062028,#1a6b78,#e7f4ef)' },
+  { id: 'p17', title: 'Solar Static',     price: 39, cat: 'abstract',  hue: 'linear-gradient(135deg,#180a1a,#7a2bff,#f5c451)' },
+  { id: 'p18', title: 'Granite Range',    price: 59, cat: 'landscape', hue: 'linear-gradient(135deg,#1a1d22,#5d6068,#d6dae0)' },
 ];
 
 function initShop() {
   const grid = document.getElementById('shopGrid');
+  const filters = document.getElementById('shopFilters');
   if (!grid) return;
-  grid.innerHTML = PRODUCTS.map(p => `
-    <article class="product" data-id="${p.id}">
-      <div class="product__art" style="background-image:${p.hue}"></div>
-      <div class="product__body">
-        <h4>${p.title}</h4>
-        <span>From $${p.price}</span>
-      </div>
-    </article>
-  `).join('');
+  let activeCat = 'all';
 
-  grid.querySelectorAll('.product').forEach(el => {
-    el.addEventListener('click', () => {
-      const id = el.dataset.id;
-      const p = PRODUCTS.find(x => x.id === id);
-      if (!p) return;
-      // Use the gradient as the artwork in the customizer
-      const tex = gradientToTexture(p.hue, p.title);
-      Customizer.loadTexture(tex);
-      document.getElementById('customizer').scrollIntoView({ behavior: 'smooth' });
+  function render() {
+    const list = activeCat === 'all' ? PRODUCTS : PRODUCTS.filter(p => p.cat === activeCat);
+    grid.innerHTML = list.map(p => `
+      <article class="product" data-id="${p.id}">
+        <div class="product__art" style="background-image:${p.hue}"></div>
+        <div class="product__body">
+          <span class="product__cat">${p.cat}</span>
+          <h4>${p.title}</h4>
+          <span>From $${p.price}</span>
+        </div>
+      </article>
+    `).join('');
+
+    grid.querySelectorAll('.product').forEach(el => {
+      el.addEventListener('click', () => {
+        const id = el.dataset.id;
+        const p = PRODUCTS.find(x => x.id === id);
+        if (!p) return;
+        const tex = gradientToTexture(p.hue, p.title);
+        Customizer.loadTexture(tex);
+        document.getElementById('customizer').scrollIntoView({ behavior: 'smooth' });
+      });
     });
-  });
+  }
+
+  if (filters) {
+    filters.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        filters.querySelectorAll('.chip').forEach(c => c.classList.remove('is-active'));
+        chip.classList.add('is-active');
+        activeCat = chip.dataset.cat;
+        render();
+      });
+    });
+  }
+
+  render();
 }
 
 function gradientToTexture(cssGradient, label) {
@@ -337,7 +445,7 @@ function gradientToTexture(cssGradient, label) {
 // =====================================================
 const Customizer = (() => {
   let scene, camera, renderer, controls, currentMesh, currentTex = PLACEHOLDER_TEX;
-  let state = { material: 'poster', size: 'S', orient: 'portrait', finish: 'matte' };
+  let state = { material: 'poster', size: 'S', orient: 'portrait', finish: 'matte', frame: 'none', matting: 'none' };
 
   function init() {
     const canvas = document.getElementById('custCanvas');
@@ -374,16 +482,25 @@ const Customizer = (() => {
   function rebuild() {
     if (currentMesh) scene.remove(currentMesh);
     const { w, h } = ORIENT_DIMS[state.orient];
-    currentMesh = buildPrintMesh({
+    currentMesh = buildFramedPrint({
       material: state.material,
       w, h,
       texture: currentTex,
       finish: state.finish,
+      frame: state.frame,
+      matting: state.matting,
     });
     currentMesh.rotation.y = -0.4;
     currentMesh.rotation.x = 0.05;
     scene.add(currentMesh);
     updatePrice();
+  }
+
+  function calcPrice() {
+    const base = PRICES[state.material][state.size];
+    const frame = Math.round(FRAME_PRICES[state.frame] * FRAME_SIZE_MULT[state.size]);
+    const mat = Math.round(MATTING_PRICES[state.matting] * MATTING_SIZE_MULT[state.size]);
+    return base + frame + mat;
   }
 
   function bindUI() {
@@ -392,6 +509,8 @@ const Customizer = (() => {
       { id: 'sizeChips', key: 'size' },
       { id: 'orientChips', key: 'orient' },
       { id: 'finishChips', key: 'finish' },
+      { id: 'frameChips', key: 'frame' },
+      { id: 'mattingChips', key: 'matting' },
     ];
     groups.forEach(g => {
       const el = document.getElementById(g.id);
@@ -423,7 +542,9 @@ const Customizer = (() => {
         size: state.size,
         orient: state.orient,
         finish: state.finish,
-        price: PRICES[state.material][state.size],
+        frame: state.frame,
+        matting: state.matting,
+        price: calcPrice(),
         thumb: textureToDataUrl(currentTex),
       });
       toast('Added to cart');
@@ -485,8 +606,7 @@ const Customizer = (() => {
   }
 
   function updatePrice() {
-    const p = PRICES[state.material][state.size];
-    document.getElementById('custPrice').textContent = `$${p.toFixed(2)}`;
+    document.getElementById('custPrice').textContent = `$${calcPrice().toFixed(2)}`;
   }
 
   return { init, loadTexture };
@@ -568,17 +688,22 @@ const Cart = (() => {
     if (items.length === 0) {
       body.innerHTML = '<p class="muted">Your cart is empty.</p>';
     } else {
-      body.innerHTML = items.map(i => `
-        <div class="cart-item">
-          <div class="cart-item__thumb" style="background-image:url(${i.thumb || ''})"></div>
-          <div>
-            <h4>${i.title}</h4>
-            <div class="cart-item__meta">${cap(i.material)} · ${i.size} · ${cap(i.finish)}</div>
-            <button class="cart-item__rm" data-id="${i.id}">Remove</button>
+      body.innerHTML = items.map(i => {
+        const meta = [cap(i.material), i.size, cap(i.finish)];
+        if (i.frame && i.frame !== 'none') meta.push(`${cap(i.frame)} frame`);
+        if (i.matting && i.matting !== 'none') meta.push(`${cap(i.matting)} mat`);
+        return `
+          <div class="cart-item">
+            <div class="cart-item__thumb" style="background-image:url(${i.thumb || ''})"></div>
+            <div>
+              <h4>${i.title}</h4>
+              <div class="cart-item__meta">${meta.join(' · ')}</div>
+              <button class="cart-item__rm" data-id="${i.id}">Remove</button>
+            </div>
+            <div class="cart-item__price">$${i.price.toFixed(2)}</div>
           </div>
-          <div class="cart-item__price">$${i.price.toFixed(2)}</div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
       body.querySelectorAll('.cart-item__rm').forEach(b => {
         b.addEventListener('click', () => remove(b.dataset.id));
       });
@@ -601,12 +726,51 @@ const Cart = (() => {
     document.getElementById('cartBtn').addEventListener('click', open);
     document.getElementById('closeCart').addEventListener('click', close);
     document.getElementById('scrim').addEventListener('click', close);
-    document.getElementById('checkoutBtn').addEventListener('click', () => {
-      if (items.length === 0) { toast('Your cart is empty'); return; }
-      toast('Checkout is a demo — your prints would now ship!');
-      clear(); close();
-    });
+    document.getElementById('checkoutBtn').addEventListener('click', checkout);
     render();
+  }
+
+  async function checkout() {
+    if (items.length === 0) { toast('Your cart is empty'); return; }
+
+    const cfg = window.EPICPRINTS_CONFIG || {};
+    if (!cfg.STRIPE_PUBLISHABLE_KEY) {
+      toast('Add a Stripe key in assets/js/config.js to enable real checkout');
+      return;
+    }
+    if (typeof window.Stripe !== 'function') {
+      toast('Stripe.js failed to load');
+      return;
+    }
+
+    const btn = document.getElementById('checkoutBtn');
+    btn.disabled = true;
+    const original = btn.textContent;
+    btn.textContent = 'Redirecting…';
+
+    try {
+      const res = await fetch(cfg.CHECKOUT_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items, currency: cfg.CURRENCY || 'usd' }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data.url) {
+        window.location.assign(data.url);
+        return;
+      }
+      if (data.id) {
+        const stripe = window.Stripe(cfg.STRIPE_PUBLISHABLE_KEY);
+        await stripe.redirectToCheckout({ sessionId: data.id });
+        return;
+      }
+      throw new Error('No session URL returned');
+    } catch (e) {
+      toast(`Checkout failed: ${e.message}`);
+      btn.disabled = false;
+      btn.textContent = original;
+    }
   }
 
   return { init, add, remove, clear };

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EpicPrints — Premium Print on Demand: Posters, Canvas, Wood, Metal</title>
+  <meta name="description" content="EpicPrints turns your photos and artwork into museum-quality posters, canvas, wood, and metal prints. Upload, preview in 3D, and ship worldwide." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230b0d12'/%3E%3Ctext x='50' y='66' font-family='Space Grotesk' font-size='62' font-weight='700' text-anchor='middle' fill='%23f5c451'%3EE%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <header class="nav">
+    <div class="nav__inner">
+      <a href="#top" class="logo">
+        <span class="logo__mark">E</span>
+        <span class="logo__text">Epic<span>Prints</span></span>
+      </a>
+      <nav class="nav__links">
+        <a href="#materials">Materials</a>
+        <a href="#shop">Shop</a>
+        <a href="#customizer">Upload &amp; Print</a>
+        <a href="#how">How it works</a>
+        <a href="#about">About</a>
+      </nav>
+      <div class="nav__actions">
+        <button class="btn btn--ghost" id="cartBtn" aria-label="Open cart">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h2l2.4 12.5a2 2 0 002 1.5h7.5a2 2 0 002-1.5L21 7H6"/><circle cx="9" cy="21" r="1.5"/><circle cx="18" cy="21" r="1.5"/></svg>
+          <span id="cartCount">0</span>
+        </button>
+        <a href="#customizer" class="btn btn--primary">Start Printing</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" id="top">
+    <canvas id="heroCanvas"></canvas>
+    <div class="hero__overlay">
+      <div class="hero__copy">
+        <p class="eyebrow">Premium Print on Demand</p>
+        <h1>Your photos, <span class="grad">printed legendary.</span></h1>
+        <p class="lead">Museum-grade posters, gallery canvas, rich wood, and brushed metal — printed to order and shipped worldwide. Upload a photo, preview it in 3D, and we'll handcraft your print.</p>
+        <div class="hero__cta">
+          <a href="#customizer" class="btn btn--primary btn--lg">Upload a Photo</a>
+          <a href="#materials" class="btn btn--ghost btn--lg">Explore Materials</a>
+        </div>
+        <ul class="hero__stats">
+          <li><strong>4.9★</strong><span>12,400+ reviews</span></li>
+          <li><strong>72hr</strong><span>Production time</span></li>
+          <li><strong>100%</strong><span>Color match guarantee</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="hero__scrim"></div>
+  </section>
+
+  <!-- TRUST STRIP -->
+  <section class="strip">
+    <div class="strip__inner">
+      <span>Trusted by photographers, designers, and creators worldwide</span>
+      <div class="strip__logos">
+        <span>FRAME &amp; CO</span><span>STUDIO LUMEN</span><span>NORTH/LIGHT</span><span>ATELIER 88</span><span>VANTA GALLERY</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- MATERIALS -->
+  <section class="materials" id="materials">
+    <div class="section-head">
+      <p class="eyebrow">Four signature finishes</p>
+      <h2>Pick your material. <span class="grad">Feel the difference.</span></h2>
+      <p class="sub">Each medium is hand-finished in our studio. Hover a card to spin it in 3D.</p>
+    </div>
+
+    <div class="materials__grid">
+      <article class="mcard" data-material="poster">
+        <canvas class="mcard__canvas"></canvas>
+        <div class="mcard__body">
+          <h3>Poster</h3>
+          <p>Heavyweight 230gsm matte or satin paper with archival inks.</p>
+          <div class="mcard__meta"><span>From $19</span><a href="#customizer" data-pick="poster">Customize →</a></div>
+        </div>
+      </article>
+
+      <article class="mcard" data-material="canvas">
+        <canvas class="mcard__canvas"></canvas>
+        <div class="mcard__body">
+          <h3>Canvas</h3>
+          <p>Gallery-wrap, 1.5" depth, finger-jointed pine stretcher.</p>
+          <div class="mcard__meta"><span>From $49</span><a href="#customizer" data-pick="canvas">Customize →</a></div>
+        </div>
+      </article>
+
+      <article class="mcard" data-material="wood">
+        <canvas class="mcard__canvas"></canvas>
+        <div class="mcard__body">
+          <h3>Wood</h3>
+          <p>UV-printed birch ply with visible grain texture and beveled edge.</p>
+          <div class="mcard__meta"><span>From $59</span><a href="#customizer" data-pick="wood">Customize →</a></div>
+        </div>
+      </article>
+
+      <article class="mcard" data-material="metal">
+        <canvas class="mcard__canvas"></canvas>
+        <div class="mcard__body">
+          <h3>Metal</h3>
+          <p>Sublimated brushed aluminum — vivid, waterproof, scratch-resistant.</p>
+          <div class="mcard__meta"><span>From $69</span><a href="#customizer" data-pick="metal">Customize →</a></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- SHOP / CURATED -->
+  <section class="shop" id="shop">
+    <div class="section-head">
+      <p class="eyebrow">Curated collections</p>
+      <h2>Shop ready-made prints.</h2>
+      <p class="sub">Hand-picked pieces from our studio collection. Tap any to print on the material of your choice.</p>
+    </div>
+    <div class="shop__filters" id="shopFilters">
+      <button class="chip is-active" data-cat="all">All</button>
+      <button class="chip" data-cat="landscape">Landscape</button>
+      <button class="chip" data-cat="abstract">Abstract</button>
+      <button class="chip" data-cat="urban">Urban</button>
+      <button class="chip" data-cat="nature">Nature</button>
+    </div>
+    <div class="shop__grid" id="shopGrid"></div>
+  </section>
+
+  <!-- CUSTOMIZER -->
+  <section class="customizer" id="customizer">
+    <div class="section-head">
+      <p class="eyebrow">Upload &amp; Print</p>
+      <h2>See your photo come alive in <span class="grad">3D</span>.</h2>
+      <p class="sub">Drop in any image — JPG, PNG, or HEIC up to 50MB. We'll mock it on your chosen material in real time.</p>
+    </div>
+
+    <div class="cust">
+      <div class="cust__viewer">
+        <canvas id="custCanvas"></canvas>
+        <div class="cust__hint">Drag to rotate · Scroll to zoom</div>
+        <div class="cust__drop" id="dropZone">
+          <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4m0 0l-4 4m4-4l4 4"/><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+          <p><strong>Drop your photo here</strong></p>
+          <p class="muted">or click to browse</p>
+          <input type="file" id="fileInput" accept="image/*" hidden />
+        </div>
+      </div>
+
+      <aside class="cust__panel">
+        <div class="panel__group">
+          <label>Material</label>
+          <div class="chips" id="materialChips">
+            <button class="chip is-active" data-material="poster">Poster</button>
+            <button class="chip" data-material="canvas">Canvas</button>
+            <button class="chip" data-material="wood">Wood</button>
+            <button class="chip" data-material="metal">Metal</button>
+          </div>
+        </div>
+
+        <div class="panel__group">
+          <label>Size</label>
+          <div class="chips" id="sizeChips">
+            <button class="chip is-active" data-size="S">12 × 16"</button>
+            <button class="chip" data-size="M">18 × 24"</button>
+            <button class="chip" data-size="L">24 × 36"</button>
+            <button class="chip" data-size="XL">36 × 48"</button>
+          </div>
+        </div>
+
+        <div class="panel__group">
+          <label>Orientation</label>
+          <div class="chips" id="orientChips">
+            <button class="chip is-active" data-orient="portrait">Portrait</button>
+            <button class="chip" data-orient="landscape">Landscape</button>
+            <button class="chip" data-orient="square">Square</button>
+          </div>
+        </div>
+
+        <div class="panel__group">
+          <label>Finish</label>
+          <div class="chips" id="finishChips">
+            <button class="chip is-active" data-finish="matte">Matte</button>
+            <button class="chip" data-finish="satin">Satin</button>
+            <button class="chip" data-finish="gloss">Gloss</button>
+          </div>
+        </div>
+
+        <div class="panel__group">
+          <label>Frame</label>
+          <div class="chips" id="frameChips">
+            <button class="chip is-active" data-frame="none">None</button>
+            <button class="chip" data-frame="black">Black</button>
+            <button class="chip" data-frame="white">White</button>
+            <button class="chip" data-frame="oak">Oak</button>
+            <button class="chip" data-frame="walnut">Walnut</button>
+          </div>
+        </div>
+
+        <div class="panel__group">
+          <label>Matting</label>
+          <div class="chips" id="mattingChips">
+            <button class="chip is-active" data-matting="none">None</button>
+            <button class="chip" data-matting="white">White</button>
+            <button class="chip" data-matting="cream">Cream</button>
+          </div>
+        </div>
+
+        <div class="panel__price">
+          <div>
+            <span class="muted">Total</span>
+            <strong id="custPrice">$19.00</strong>
+          </div>
+          <button class="btn btn--primary btn--lg" id="addToCart">Add to Cart</button>
+        </div>
+
+        <p class="panel__note">Free U.S. shipping over $75 · Made-to-order in 72 hours · Color-match guarantee.</p>
+      </aside>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how" id="how">
+    <div class="section-head">
+      <p class="eyebrow">How it works</p>
+      <h2>From pixels to wall in <span class="grad">three steps</span>.</h2>
+    </div>
+    <ol class="how__steps">
+      <li>
+        <span class="how__num">01</span>
+        <h3>Upload</h3>
+        <p>Drop in any photo or artwork. We auto-check resolution and color profile.</p>
+      </li>
+      <li>
+        <span class="how__num">02</span>
+        <h3>Preview in 3D</h3>
+        <p>Pick material, size, and finish. See your piece rendered in real time.</p>
+      </li>
+      <li>
+        <span class="how__num">03</span>
+        <h3>We print &amp; ship</h3>
+        <p>Hand-finished in our studio and shipped worldwide in 3–5 business days.</p>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="about" id="about">
+    <div class="about__grid">
+      <div>
+        <p class="eyebrow">About EpicPrints</p>
+        <h2>Built by printmakers. <span class="grad">Made for creators.</span></h2>
+        <p>EpicPrints started in a small studio with one giclée printer and a love for great paper. Today we partner with a global network of certified print labs to deliver museum-quality prints on demand — without the gallery markup.</p>
+        <p>Every order is color-matched, hand-inspected, and protected by our re-print guarantee. If it's not perfect, we'll make it right.</p>
+        <div class="about__badges">
+          <div><strong>FSC®</strong><span>Certified papers</span></div>
+          <div><strong>Giclée</strong><span>12-color archival</span></div>
+          <div><strong>Carbon</strong><span>Neutral shipping</span></div>
+        </div>
+      </div>
+      <div class="about__art">
+        <canvas id="aboutCanvas"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <div class="cta__inner">
+      <h2>Ready to print something <span class="grad">epic</span>?</h2>
+      <p>Upload a photo and watch it come alive on canvas, wood, or metal.</p>
+      <a href="#customizer" class="btn btn--primary btn--lg">Start Your Print</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="foot">
+    <div class="foot__inner">
+      <div class="foot__brand">
+        <span class="logo__mark">E</span>
+        <strong>EpicPrints</strong>
+        <p>Museum-quality print on demand. Posters, canvas, wood, metal.</p>
+      </div>
+      <div class="foot__cols">
+        <div>
+          <h4>Shop</h4>
+          <a href="#materials">Posters</a>
+          <a href="#materials">Canvas</a>
+          <a href="#materials">Wood</a>
+          <a href="#materials">Metal</a>
+        </div>
+        <div>
+          <h4>Studio</h4>
+          <a href="#about">About</a>
+          <a href="#how">How it works</a>
+          <a href="#customizer">Upload</a>
+        </div>
+        <div>
+          <h4>Help</h4>
+          <a href="#">Shipping</a>
+          <a href="#">Returns</a>
+          <a href="#">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot__bottom">
+      <span>© <span id="year"></span> EpicPrints. All rights reserved.</span>
+      <span>Crafted with care · Printed with passion.</span>
+    </div>
+  </footer>
+
+  <!-- CART DRAWER -->
+  <aside class="drawer" id="cartDrawer" aria-hidden="true">
+    <div class="drawer__head">
+      <h3>Your Cart</h3>
+      <button class="iconbtn" id="closeCart" aria-label="Close cart">✕</button>
+    </div>
+    <div class="drawer__body" id="cartBody">
+      <p class="muted">Your cart is empty.</p>
+    </div>
+    <div class="drawer__foot">
+      <div class="drawer__total"><span>Subtotal</span><strong id="cartTotal">$0.00</strong></div>
+      <button class="btn btn--primary btn--lg" id="checkoutBtn">Checkout</button>
+      <p class="muted small">Demo checkout — no charge will be made.</p>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <!-- THREE.JS -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script src="https://js.stripe.com/v3/"></script>
+  <script src="assets/js/config.js"></script>
+  <script type="module" src="assets/js/main.js"></script>
+</body>
+</html>

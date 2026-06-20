@@ -572,20 +572,40 @@ const Customizer = (() => {
   }
 
   function loadFile(file) {
+    const MAX_SIZE = 50 * 1024 * 1024;
+    const VALID_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
+
     if (!file.type.startsWith('image/')) {
-      toast('Please drop an image file');
+      toast('Please drop an image file (JPG, PNG, WebP, or HEIC)');
       return;
     }
+
+    if (file.size > MAX_SIZE) {
+      toast(`File too large (max 50MB, got ${(file.size / 1024 / 1024).toFixed(1)}MB)`);
+      return;
+    }
+
     const url = URL.createObjectURL(file);
     const img = new Image();
+
+    img.onerror = () => {
+      toast('Could not load image. Try another file.');
+      URL.revokeObjectURL(url);
+    };
+
     img.onload = () => {
+      if (img.width < 300 || img.height < 300) {
+        toast('Image too small (min 300×300px). Try a higher resolution.');
+        URL.revokeObjectURL(url);
+        return;
+      }
+
       const tex = new THREE.Texture(img);
       tex.colorSpace = THREE.SRGBColorSpace;
       tex.anisotropy = 8;
       tex.needsUpdate = true;
       currentTex = tex;
 
-      // Auto-pick orientation based on aspect
       const ar = img.width / img.height;
       const o = ar > 1.15 ? 'landscape' : ar < 0.87 ? 'portrait' : 'square';
       const orientChips = document.getElementById('orientChips');
@@ -594,7 +614,7 @@ const Customizer = (() => {
 
       document.getElementById('dropZone').classList.add('is-hidden');
       rebuild();
-      toast('Photo loaded — drag the preview to rotate');
+      toast('✓ Photo loaded — drag to rotate, scroll to zoom');
     };
     img.src = url;
   }
@@ -676,7 +696,14 @@ const Cart = (() => {
 
   function save() { localStorage.setItem(KEY, JSON.stringify(items)); render(); }
 
-  function add(item) { items.push(item); save(); }
+  function add(item) {
+    if (!item.id || !item.title || typeof item.price !== 'number' || item.price <= 0) {
+      console.error('Invalid cart item:', item);
+      return;
+    }
+    items.push(item);
+    save();
+  }
   function remove(id) { items = items.filter(i => i.id !== id); save(); }
   function clear() { items = []; save(); }
 
